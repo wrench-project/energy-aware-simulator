@@ -15,12 +15,14 @@
 class EnergyAwareStandardJobScheduler : public wrench::StandardJobScheduler {
 
 public:
-    // Constructor
-    EnergyAwareStandardJobScheduler();
+    explicit EnergyAwareStandardJobScheduler(std::shared_ptr<wrench::StorageService> storage_service);
 
     void scheduleTasks(const std::set<std::shared_ptr<wrench::ComputeService>> &compute_services,
                        const std::vector<wrench::WorkflowTask *> &tasks) override;
 
+private:
+    std::shared_ptr<wrench::StorageService> default_storage_service;
+    std::set<std::string> vms_pool;
 };
 
 

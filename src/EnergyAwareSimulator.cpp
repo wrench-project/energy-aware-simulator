@@ -54,34 +54,24 @@ int main(int argc, char **argv) {
     // compute services
     std::set<std::shared_ptr<wrench::ComputeService>> compute_services;
     std::vector<std::string> hosts{"worker1", "worker2"};
-    for (auto &hostname : hosts) {
-        std::map<std::string, std::tuple<unsigned long, double>> compute_resources;
-        compute_resources.insert(std::make_pair(hostname,
-                                                std::make_tuple(
-                                                        wrench::Simulation::getHostNumCores(hostname),
-                                                        wrench::Simulation::getHostMemoryCapacity(hostname))));
-        compute_services.insert(simulation.add(new wrench::BareMetalComputeService(
-                hostname, compute_resources, {"/"}, {}, {})));
-    }
+    compute_services.insert(simulation.add(new wrench::CloudComputeService(wms_host, hosts, {"/"}, {}, {})));
 
     // storage services
     std::string storage_host = "data_server";
-    std::set<std::shared_ptr<wrench::StorageService>> storage_services;
-    storage_services.insert(simulation.add(new wrench::SimpleStorageService(storage_host, {"/"})));
+    std::shared_ptr<wrench::StorageService> storage_service = simulation.add(
+            new wrench::SimpleStorageService(storage_host, {"/"}));
 
     // instantiate the wms
     auto wms = simulation.add(
-            new GreedyWMS(std::make_unique<EnergyAwareStandardJobScheduler>(),
-                          compute_services, storage_services, wms_host));
+            new GreedyWMS(std::make_unique<EnergyAwareStandardJobScheduler>(storage_service),
+                          compute_services, {storage_service}, wms_host));
 
     wms->addWorkflow(workflow);
 
     // stage input data
     WRENCH_INFO("Staging workflow input files to external Storage Service...");
     for (auto file : workflow->getInputFiles()) {
-        for (const auto& storage_service : storage_services) {
-            simulation.stageFile(file, storage_service);
-        }
+        simulation.stageFile(file, storage_service);
     }
 
     // simulation execution
@@ -96,6 +86,7 @@ int main(int argc, char **argv) {
     WRENCH_INFO("Simulation done!");
 
     // statistics
+    simulation.getOutput().dumpUnifiedJSON(workflow, "tmp.json");
 
     return 0;
 }
