@@ -1,0 +1,25 @@
+name: Build
+
+on: [ push ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Configure Docker
+        run: |
+          sudo apt-get update
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+          sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+          sudo apt-get update
+          sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+
+      - name: Source Build
+        run: |
+          docker pull wrenchproject/wrench:unstable;
+          docker run -m 4g -d -t --name=wrench wrenchproject/wrench:unstable bash;
+          docker exec wrench git clone https://github.com/wrench-project/energy-aware-simulator;
+          docker exec wrench mkdir energy-aware-simulator/build;
+          docker exec -w /home/wrench/energy-aware-simulator/build wrench cmake -DCMAKE_VERBOSE_MAKEFILE=ON ..;
+          docker exec -w /home/wrench/energy-aware-simulator/build wrench make all;

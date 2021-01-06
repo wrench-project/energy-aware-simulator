@@ -12,18 +12,20 @@
 
 #include <wrench-dev.h>
 
+#include "SchedulingAlgorithm.h"
+
 class EnergyAwareStandardJobScheduler : public wrench::StandardJobScheduler {
 
 public:
-    explicit EnergyAwareStandardJobScheduler(std::shared_ptr<wrench::StorageService> storage_service);
+    explicit EnergyAwareStandardJobScheduler(std::shared_ptr<wrench::StorageService> storage_service,
+                                             std::unique_ptr<SchedulingAlgorithm> scheduling_algorithm);
 
     void scheduleTasks(const std::set<std::shared_ptr<wrench::ComputeService>> &compute_services,
                        const std::vector<wrench::WorkflowTask *> &tasks) override;
 
 private:
     std::shared_ptr<wrench::StorageService> default_storage_service;
-    std::set<std::string> vms_pool;
+    std::unique_ptr<SchedulingAlgorithm> scheduling_algorithm;
 };
-
 
 #endif //ENERGY_AWARE_ENERGYAWARESTANDARDJOBSCHEDULER_H

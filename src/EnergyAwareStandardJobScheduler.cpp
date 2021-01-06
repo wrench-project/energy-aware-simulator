@@ -19,8 +19,9 @@ WRENCH_LOG_CATEGORY(energy_aware_scheduler, "Log category for Energy Aware Sched
  * @param storage_service: default storage service available for the scheduler
  */
 EnergyAwareStandardJobScheduler::EnergyAwareStandardJobScheduler(
-        std::shared_ptr<wrench::StorageService> storage_service) :
-        default_storage_service(std::move(storage_service)) {}
+        std::shared_ptr<wrench::StorageService> storage_service,
+        std::unique_ptr<SchedulingAlgorithm> scheduling_algorithm) :
+        default_storage_service(std::move(storage_service)), scheduling_algorithm(std::move(scheduling_algorithm)) {}
 
 /**
  * @brief A method that schedules tasks (as part of standard jobs), according to whatever decision algorithm
@@ -35,6 +36,8 @@ void EnergyAwareStandardJobScheduler::scheduleTasks(
     // If nothing to do, return;
     if (compute_services.empty() or tasks.empty()) {
         return;
+    } else if (compute_services.size() > 1) {
+        throw std::runtime_error("This Energy-Aware Cloud Scheduler can only handle a single compute service");
     }
 
     WRENCH_INFO("There are %ld ready tasks to schedule", tasks.size());
@@ -53,40 +56,40 @@ void EnergyAwareStandardJobScheduler::scheduleTasks(
     // obtaining cloud service
     auto cloud_service = std::dynamic_pointer_cast<wrench::CloudComputeService>(*compute_services.begin());
     if (cloud_service == nullptr) {
-        throw std::runtime_error("This example Cloud Scheduler can only handle a cloud service");
+        throw std::runtime_error("This Energy-Aware Cloud Scheduler can only handle a cloud service");
     }
 
     // attempting to schedule tasks
     for (auto const &task : sorted_tasks) {
-
-        std::shared_ptr<wrench::BareMetalComputeService> vm_cs = nullptr;
-
-        if (cloud_service->getTotalNumIdleCores() > 0) {
-            std::string vm_name = cloud_service->createVM(1, 1000000000);
-            vm_cs = cloud_service->startVM(vm_name);
-            this->vms_pool.insert(vm_name);
-        } else {
-            for (const auto &vm_name : this->vms_pool) {
-                if (cloud_service->isVMRunning(vm_name)) {
-                    auto candidate_vm_cs = cloud_service->getVMComputeService(vm_name);
-                    if (candidate_vm_cs->getTotalNumIdleCores() > 0) {
-                        vm_cs = candidate_vm_cs;
-                        break;
-                    }
-                }
-            }
-        }
-
-        // finding the file locations
-        std::map<wrench::WorkflowFile *, std::shared_ptr<wrench::FileLocation>> file_locations;
-        for (auto f : task->getInputFiles()) {
-            file_locations[f] = wrench::FileLocation::LOCATION(this->default_storage_service);
-        }
-        for (auto f : task->getOutputFiles()) {
-            file_locations[f] = wrench::FileLocation::LOCATION(this->default_storage_service);
-        }
+        auto vm_cs = this->scheduling_algorithm->scheduleTask(task);
+//
+//        if (cloud_service->getTotalNumIdleCores() > 0) {
+//            std::string vm_name = cloud_service->createVM(1, 1000000000);
+//            vm_cs = cloud_service->startVM(vm_name);
+//            this->vms_pool.insert(vm_name);
+//        } else {
+//            for (const auto &vm_name : this->vms_pool) {
+//                if (cloud_service->isVMRunning(vm_name)) {
+//                    auto candidate_vm_cs = cloud_service->getVMComputeService(vm_name);
+//                    if (candidate_vm_cs->getTotalNumIdleCores() > 0) {
+//                        vm_cs = candidate_vm_cs;
+//                        break;
+//                    }
+//                }
+//            }
+//        }
+//
 
         if (vm_cs) {
+            // finding the file locations
+            std::map<wrench::WorkflowFile *, std::shared_ptr<wrench::FileLocation>> file_locations;
+            for (auto f : task->getInputFiles()) {
+                file_locations[f] = wrench::FileLocation::LOCATION(this->default_storage_service);
+            }
+            for (auto f : task->getOutputFiles()) {
+                file_locations[f] = wrench::FileLocation::LOCATION(this->default_storage_service);
+            }
+
             // creating job for execution
             std::shared_ptr<wrench::WorkflowJob> job =
                     (std::shared_ptr<wrench::WorkflowJob>) this->getJobManager()->createStandardJob(task,

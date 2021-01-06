@@ -32,6 +32,9 @@ set(SOURCE_FILES
         src/EnergyAwareStandardJobScheduler.cpp
         src/GreedyWMS.h
         src/GreedyWMS.cpp
+        src/SchedulingAlgorithm.h
+        src/SPSSEBAlgorithm.h
+        src/SPSSEBAlgorithm.cpp
         )
 
 set(TEST_FILES

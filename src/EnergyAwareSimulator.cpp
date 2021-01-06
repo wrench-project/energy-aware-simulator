@@ -12,6 +12,7 @@
 
 #include "EnergyAwareStandardJobScheduler.h"
 #include "GreedyWMS.h"
+#include "SPSSEBAlgorithm.h"
 
 XBT_LOG_NEW_DEFAULT_CATEGORY(EnergyAwareSimulator, "Log category for EnergyAwareSimulator");
 
@@ -54,7 +55,8 @@ int main(int argc, char **argv) {
     // compute services
     std::set<std::shared_ptr<wrench::ComputeService>> compute_services;
     std::vector<std::string> hosts{"worker1", "worker2"};
-    compute_services.insert(simulation.add(new wrench::CloudComputeService(wms_host, hosts, {"/"}, {}, {})));
+    auto cloud_service = simulation.add(new wrench::CloudComputeService(wms_host, hosts, {"/"}, {}, {}));
+    compute_services.insert(cloud_service);
 
     // storage services
     std::string storage_host = "data_server";
@@ -63,7 +65,9 @@ int main(int argc, char **argv) {
 
     // instantiate the wms
     auto wms = simulation.add(
-            new GreedyWMS(std::make_unique<EnergyAwareStandardJobScheduler>(storage_service),
+            new GreedyWMS(std::make_unique<EnergyAwareStandardJobScheduler>(
+                    storage_service,
+                    std::make_unique<SPSSEBAlgorithm>(cloud_service)),
                           compute_services, {storage_service}, wms_host));
 
     wms->addWorkflow(workflow);
