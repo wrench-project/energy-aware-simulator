@@ -17,7 +17,7 @@ class SPSSEBAlgorithm : public SchedulingAlgorithm {
 public:
     explicit SPSSEBAlgorithm(std::shared_ptr<wrench::CloudComputeService> &cloud_service);
 
-    std::shared_ptr<wrench::BareMetalComputeService> scheduleTask(const wrench::WorkflowTask *task) override;
+    std::string scheduleTask(const wrench::WorkflowTask *task) override;
 
 private:
     std::set<std::string> vms_pool;

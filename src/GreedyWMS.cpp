@@ -91,11 +91,11 @@ void GreedyWMS::processEventStandardJobCompletion(std::shared_ptr<wrench::Standa
 
     // Retrieve the job's tasks
     for (auto const &task : job->getTasks()) {
-
+        // notify task completion
         WRENCH_INFO("Notified that a standard job has completed task %s", task->getID().c_str());
         auto scheduler = (EnergyAwareStandardJobScheduler *) (this->getStandardJobScheduler());
-        // scheduler->updateCoreIdleness(cs, task->getExecutionHistory().top().num_cores_allocated);
-//        scheduler->notifyThatTaskHasCompleted(task);
+//         scheduler->updateCoreIdleness(cs, task->getExecutionHistory().top().num_cores_allocated);
+        scheduler->notifyTaskCompletion(this->getAvailableComputeServices<wrench::ComputeService>(), task);
     }
 }
 

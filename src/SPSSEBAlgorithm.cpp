@@ -9,7 +9,7 @@
 
 #include "SPSSEBAlgorithm.h"
 
-WRENCH_LOG_CATEGORY(spss_eb_algorithm, "Log category for SPSS EB Algorithm");
+WRENCH_LOG_CATEGORY(spss_eb_algorithm, "Log category for SPSSEBAlgorithm");
 
 /**
  *
@@ -23,24 +23,33 @@ SPSSEBAlgorithm::SPSSEBAlgorithm(std::shared_ptr<wrench::CloudComputeService> &c
  * @param task
  * @return
  */
-std::shared_ptr<wrench::BareMetalComputeService> SPSSEBAlgorithm::scheduleTask(const wrench::WorkflowTask *task) {
-    std::shared_ptr<wrench::BareMetalComputeService> vm_cs = nullptr;
+std::string SPSSEBAlgorithm::scheduleTask(const wrench::WorkflowTask *task) {
+    std::string vm_name;
+    std::string vm_down_name;
 
-    if (cloud_service->getTotalNumIdleCores() > 0) {
-        std::string vm_name = cloud_service->createVM(1, 1000000000);
-        vm_cs = cloud_service->startVM(vm_name);
-        this->vms_pool.insert(vm_name);
-    } else {
-        for (const auto &vm_name : this->vms_pool) {
-            if (cloud_service->isVMRunning(vm_name)) {
-                auto candidate_vm_cs = cloud_service->getVMComputeService(vm_name);
-                if (candidate_vm_cs->getTotalNumIdleCores() > 0) {
-                    vm_cs = candidate_vm_cs;
-                    break;
-                }
+    // look for existing VMs
+    for (const auto &vm : this->vms_pool) {
+        if (this->cloud_service->isVMRunning(vm)) {
+            if (this->cloud_service->getVMComputeService(vm)->getTotalNumIdleCores() > 0) {
+                vm_name = vm;
+                break;
             }
+        } else if (this->cloud_service->isVMDown(vm)) {
+            vm_down_name = vm;
         }
     }
 
-    return vm_cs;
+    if (vm_name.empty() && !vm_down_name.empty()) {
+        this->cloud_service->startVM(vm_down_name);
+        vm_name = vm_down_name;
+    }
+
+    // if task cannot start now on a running vm, it will start a new one if possible
+    if (vm_name.empty() && this->cloud_service->getTotalNumIdleCores() > 0) {
+        vm_name = this->cloud_service->createVM(1, 1000000000);
+        this->cloud_service->startVM(vm_name);
+        this->vms_pool.insert(vm_name);
+    }
+
+    return vm_name;
 }

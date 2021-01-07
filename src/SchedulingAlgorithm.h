@@ -29,7 +29,7 @@ public:
     /** \endcond           */
     /***********************/
 
-    virtual std::shared_ptr<wrench::BareMetalComputeService> scheduleTask(const wrench::WorkflowTask *task) = 0;
+    virtual std::string scheduleTask(const wrench::WorkflowTask *task) = 0;
 
 protected:
     std::shared_ptr<wrench::CloudComputeService> &cloud_service;

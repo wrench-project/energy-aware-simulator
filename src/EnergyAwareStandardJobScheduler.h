@@ -23,9 +23,14 @@ public:
     void scheduleTasks(const std::set<std::shared_ptr<wrench::ComputeService>> &compute_services,
                        const std::vector<wrench::WorkflowTask *> &tasks) override;
 
+    void notifyTaskCompletion(const std::set<std::shared_ptr<wrench::ComputeService>> &compute_services,
+                              wrench::WorkflowTask *task);
+
 private:
     std::shared_ptr<wrench::StorageService> default_storage_service;
     std::unique_ptr<SchedulingAlgorithm> scheduling_algorithm;
+    int unscheduled_tasks;
+    std::map<wrench::WorkflowTask *, std::string> tasks_vm_map;
 };
 
 #endif //ENERGY_AWARE_ENERGYAWARESTANDARDJOBSCHEDULER_H

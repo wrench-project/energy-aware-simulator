@@ -11,7 +11,7 @@
 
 #include <utility>
 
-WRENCH_LOG_CATEGORY(energy_aware_scheduler, "Log category for Energy Aware Scheduler");
+WRENCH_LOG_CATEGORY(energy_aware_scheduler, "Log category for EnergyAwareStandardJobScheduler");
 
 /**
  * @brief Constructor, which calls the super constructor
@@ -41,6 +41,7 @@ void EnergyAwareStandardJobScheduler::scheduleTasks(
     }
 
     WRENCH_INFO("There are %ld ready tasks to schedule", tasks.size());
+    this->unscheduled_tasks = tasks.size();
 
     // Sort tasks by flops
     auto sorted_tasks = tasks;
@@ -61,26 +62,9 @@ void EnergyAwareStandardJobScheduler::scheduleTasks(
 
     // attempting to schedule tasks
     for (auto const &task : sorted_tasks) {
-        auto vm_cs = this->scheduling_algorithm->scheduleTask(task);
-//
-//        if (cloud_service->getTotalNumIdleCores() > 0) {
-//            std::string vm_name = cloud_service->createVM(1, 1000000000);
-//            vm_cs = cloud_service->startVM(vm_name);
-//            this->vms_pool.insert(vm_name);
-//        } else {
-//            for (const auto &vm_name : this->vms_pool) {
-//                if (cloud_service->isVMRunning(vm_name)) {
-//                    auto candidate_vm_cs = cloud_service->getVMComputeService(vm_name);
-//                    if (candidate_vm_cs->getTotalNumIdleCores() > 0) {
-//                        vm_cs = candidate_vm_cs;
-//                        break;
-//                    }
-//                }
-//            }
-//        }
-//
+        auto vm_name = this->scheduling_algorithm->scheduleTask(task);
 
-        if (vm_cs) {
+        if (!vm_name.empty()) {
             // finding the file locations
             std::map<wrench::WorkflowFile *, std::shared_ptr<wrench::FileLocation>> file_locations;
             for (auto f : task->getInputFiles()) {
@@ -96,7 +80,30 @@ void EnergyAwareStandardJobScheduler::scheduleTasks(
                                                                                                     file_locations);
 
             WRENCH_INFO("Scheduling task: %s", task->getID().c_str());
+            auto vm_cs = cloud_service->getVMComputeService(vm_name);
             this->getJobManager()->submitJob(job, vm_cs);
+            this->tasks_vm_map.insert(std::pair<wrench::WorkflowTask *, std::string>(task, vm_name));
+            this->unscheduled_tasks--;
+        }
+    }
+}
+
+/**
+ * Notify that a task has completed its execution.
+ * @param compute_services
+ * @param task Pointer to task that has completed its execution.
+ */
+void EnergyAwareStandardJobScheduler::notifyTaskCompletion(
+        const std::set<std::shared_ptr<wrench::ComputeService>> &compute_services,
+        wrench::WorkflowTask *task) {
+    if (this->unscheduled_tasks > 0) {
+        this->unscheduled_tasks--;
+    } else {
+        auto it = this->tasks_vm_map.find(task);
+        auto cloud_service = std::dynamic_pointer_cast<wrench::CloudComputeService>(*compute_services.begin());
+        auto vm_cs = cloud_service->getVMComputeService(it->second);
+        if (vm_cs->getTotalNumCores() == vm_cs->getTotalNumIdleCores()) {
+            cloud_service->shutdownVM(it->second);
         }
     }
 }
