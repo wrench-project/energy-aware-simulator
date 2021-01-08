@@ -14,7 +14,6 @@
 #include "cost_model/CostModel.h"
 
 class SPSSEBAlgorithm : public SchedulingAlgorithm {
-
 public:
     SPSSEBAlgorithm(std::shared_ptr<wrench::CloudComputeService> &cloud_service,
                     std::unique_ptr<CostModel> cost_model);

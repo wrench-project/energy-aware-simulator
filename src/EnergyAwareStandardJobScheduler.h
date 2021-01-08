@@ -16,7 +16,6 @@
 #include "scheduling_algorithm/SchedulingAlgorithm.h"
 
 class EnergyAwareStandardJobScheduler : public wrench::StandardJobScheduler {
-
 public:
     EnergyAwareStandardJobScheduler(std::shared_ptr<wrench::StorageService> storage_service,
                                     std::unique_ptr<SchedulingAlgorithm> scheduling_algorithm);

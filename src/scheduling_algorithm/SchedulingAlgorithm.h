@@ -15,7 +15,6 @@
 #include "cost_model/CostModel.h"
 
 class SchedulingAlgorithm {
-
 public:
     /**
      * @brief Constructor

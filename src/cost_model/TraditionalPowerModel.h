@@ -13,7 +13,6 @@
 #include "CostModel.h"
 
 class TraditionalPowerModel : public CostModel {
-
 public:
     explicit TraditionalPowerModel(std::shared_ptr<wrench::CloudComputeService> &cloud_service);
 

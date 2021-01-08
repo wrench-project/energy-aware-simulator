@@ -35,7 +35,6 @@ EnergyAwareStandardJobScheduler::EnergyAwareStandardJobScheduler(
 void EnergyAwareStandardJobScheduler::scheduleTasks(
         const std::set<std::shared_ptr<wrench::ComputeService>> &compute_services,
         const std::vector<wrench::WorkflowTask *> &tasks) {
-
     // If nothing to do, return;
     if (compute_services.empty() or tasks.empty()) {
         return;

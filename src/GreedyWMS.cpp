@@ -45,7 +45,6 @@ GreedyWMS::GreedyWMS(std::unique_ptr<wrench::StandardJobScheduler> standard_job_
  * @throw std::runtime_error
  */
 int GreedyWMS::main() {
-
     /* Set the logging output to GREEN */
     wrench::TerminalOutput::setThisProcessLoggingColor(wrench::TerminalOutput::COLOR_GREEN);
 
@@ -63,7 +62,6 @@ int GreedyWMS::main() {
 
     // While the workflow is not done, repeat the main loop
     while (not this->getWorkflow()->isDone()) {
-
         // Get the ready tasks
         auto ready_tasks = this->getWorkflow()->getReadyTasks();
 
@@ -111,10 +109,9 @@ void GreedyWMS::processEventStandardJobFailure(std::shared_ptr<wrench::StandardJ
     WRENCH_INFO("Notified that a standard job has failed (failure cause: %s)",
                 event->failure_cause->toString().c_str());
 
-    // Retrieve the job's tasks
     WRENCH_INFO("As a result, the following tasks have failed:");
     for (auto const &task : job->getTasks()) {
-
+        // Retrieve the job's tasks
         WRENCH_INFO(" - %s", task->getID().c_str());
     }
     throw std::runtime_error("This should not happen in this example");

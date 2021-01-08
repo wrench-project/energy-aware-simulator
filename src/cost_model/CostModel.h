@@ -13,7 +13,6 @@
 #include <wrench-dev.h>
 
 class CostModel {
-
 public:
     /**
      * @brief Constructor

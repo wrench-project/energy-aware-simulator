@@ -17,7 +17,6 @@
  *         assigns tasks to compute services.
  */
 class GreedyWMS : public wrench::WMS {
-
 public:
     // Constructor
     GreedyWMS(std::unique_ptr<wrench::StandardJobScheduler> standard_job_scheduler,
