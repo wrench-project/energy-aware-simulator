@@ -11,11 +11,13 @@
 #define ENERGY_AWARE_SPSSEBALGORITHM_H
 
 #include "SchedulingAlgorithm.h"
+#include "cost_model/CostModel.h"
 
 class SPSSEBAlgorithm : public SchedulingAlgorithm {
 
 public:
-    explicit SPSSEBAlgorithm(std::shared_ptr<wrench::CloudComputeService> &cloud_service);
+    SPSSEBAlgorithm(std::shared_ptr<wrench::CloudComputeService> &cloud_service,
+                    std::unique_ptr<CostModel> cost_model);
 
     std::string scheduleTask(const wrench::WorkflowTask *task) override;
 

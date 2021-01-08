@@ -12,27 +12,25 @@
 
 #include <wrench-dev.h>
 
+#include "cost_model/CostModel.h"
+
 class SchedulingAlgorithm {
 
 public:
     /**
      * @brief Constructor
      */
-    explicit SchedulingAlgorithm(std::shared_ptr<wrench::CloudComputeService> &cloud_service) :
-            cloud_service(cloud_service) {}
+    explicit SchedulingAlgorithm(std::shared_ptr<wrench::CloudComputeService> &cloud_service,
+                                 std::unique_ptr<CostModel> cost_model) :
+            cloud_service(cloud_service), cost_model(std::move(cost_model)) {}
 
-    /***********************/
-    /** \cond INTERNAL     */
-    /***********************/
     virtual ~SchedulingAlgorithm() = default;
-    /***********************/
-    /** \endcond           */
-    /***********************/
 
     virtual std::string scheduleTask(const wrench::WorkflowTask *task) = 0;
 
 protected:
     std::shared_ptr<wrench::CloudComputeService> &cloud_service;
+    std::unique_ptr<CostModel> cost_model;
 };
 
 #endif //ENERGY_AWARE_SCHEDULINGALGORITHM_H

@@ -12,7 +12,8 @@
 
 #include "EnergyAwareStandardJobScheduler.h"
 #include "GreedyWMS.h"
-#include "SPSSEBAlgorithm.h"
+#include "cost_model/TraditionalPowerModel.h"
+#include "scheduling_algorithm/SPSSEBAlgorithm.h"
 
 XBT_LOG_NEW_DEFAULT_CATEGORY(EnergyAwareSimulator, "Log category for EnergyAwareSimulator");
 
@@ -70,7 +71,9 @@ int main(int argc, char **argv) {
     auto wms = simulation.add(
             new GreedyWMS(std::make_unique<EnergyAwareStandardJobScheduler>(
                     storage_service,
-                    std::make_unique<SPSSEBAlgorithm>(cloud_service)),
+                    std::make_unique<SPSSEBAlgorithm>(
+                            cloud_service,
+                            std::make_unique<TraditionalPowerModel>(cloud_service))),
                           compute_services, {storage_service}, wms_host));
 
     wms->addWorkflow(workflow);

@@ -21,7 +21,10 @@ WRENCH_LOG_CATEGORY(energy_aware_scheduler, "Log category for EnergyAwareStandar
 EnergyAwareStandardJobScheduler::EnergyAwareStandardJobScheduler(
         std::shared_ptr<wrench::StorageService> storage_service,
         std::unique_ptr<SchedulingAlgorithm> scheduling_algorithm) :
-        default_storage_service(std::move(storage_service)), scheduling_algorithm(std::move(scheduling_algorithm)) {}
+        default_storage_service(std::move(storage_service)),
+        scheduling_algorithm(std::move(scheduling_algorithm)) {
+    this->unscheduled_tasks = 0;
+}
 
 /**
  * @brief A method that schedules tasks (as part of standard jobs), according to whatever decision algorithm
