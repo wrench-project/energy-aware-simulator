@@ -9,7 +9,6 @@
 
 #include "SPSSEBAlgorithm.h"
 
-typedef double d;
 WRENCH_LOG_CATEGORY(spss_eb_algorithm, "Log category for SPSSEBAlgorithm");
 
 /**
@@ -19,7 +18,8 @@ WRENCH_LOG_CATEGORY(spss_eb_algorithm, "Log category for SPSSEBAlgorithm");
  */
 SPSSEBAlgorithm::SPSSEBAlgorithm(std::shared_ptr<wrench::CloudComputeService> &cloud_service,
                                  std::unique_ptr<CostModel> cost_model)
-        : SchedulingAlgorithm(cloud_service, std::move(cost_model)) {}
+        : SchedulingAlgorithm(cloud_service, std::move(cost_model)) {
+}
 
 /**
  *
@@ -43,7 +43,7 @@ std::string SPSSEBAlgorithm::scheduleTask(const wrench::WorkflowTask *task) {
     std::string vm_name;
     double min_cost = numeric_limits<double>::max();
     for (const auto &vm : candidate_vms) {
-        double cost = this->cost_model->estimateCost(task, vm);
+        double cost = this->cost_model->estimateCost(task, vm, this->worker_vms);
         if (cost < min_cost) {
             min_cost = cost;
             vm_name = vm;
@@ -53,6 +53,7 @@ std::string SPSSEBAlgorithm::scheduleTask(const wrench::WorkflowTask *task) {
     // if VM is down, start it
     if (!vm_name.empty() && this->cloud_service->isVMDown(vm_name)) {
         this->cloud_service->startVM(vm_name);
+        this->worker_vms.at(this->cloud_service->getVMPhysicalHostname(vm_name))++;
         return vm_name;
     }
 
@@ -61,7 +62,17 @@ std::string SPSSEBAlgorithm::scheduleTask(const wrench::WorkflowTask *task) {
         vm_name = this->cloud_service->createVM(1, 1000000000);
         this->cloud_service->startVM(vm_name);
         this->vms_pool.insert(vm_name);
+
+        auto vm_pm = this->cloud_service->getVMPhysicalHostname(vm_name);
+        if (this->worker_vms.find(vm_pm) == this->worker_vms.end()) {
+            this->worker_vms.insert(std::pair<std::string, int>(vm_pm, 0));
+        }
+        this->worker_vms.at(vm_pm)++;
     }
 
     return vm_name;
+}
+
+void SPSSEBAlgorithm::notifyVMShutdown(const std::string &vm_name, const std::string &vm_pm) {
+    this->worker_vms.at(vm_pm)--;
 }

@@ -20,8 +20,11 @@ public:
 
     std::string scheduleTask(const wrench::WorkflowTask *task) override;
 
+    void notifyVMShutdown(const std::string &vm_name, const std::string &vm_pm) override;
+
 private:
     std::set<std::string> vms_pool;
+    std::map<std::string, int> worker_vms;
 };
 
 #endif //ENERGY_AWARE_SPSSEBALGORITHM_H

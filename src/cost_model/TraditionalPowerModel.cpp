@@ -22,6 +22,28 @@ TraditionalPowerModel::TraditionalPowerModel(shared_ptr<wrench::CloudComputeServ
  * @param vm_name
  * @return
  */
-double TraditionalPowerModel::estimateCost(const wrench::WorkflowTask *task, std::string vm_name) {
-    return 0;
+double TraditionalPowerModel::estimateCost(const wrench::WorkflowTask *task, std::string vm_name,
+                                           std::map<std::string, int> worker_vms) {
+    if (this->cloud_service->isVMRunning(vm_name)) {
+        return 0;
+    }
+
+    bool has_idle_cores = false;
+    for (const auto &host : this->cloud_service->getExecutionHosts()) {
+        int running_vms = worker_vms.at(host);
+        if (running_vms > 0 && running_vms < wrench::Simulation::getHostNumCores(host)) {
+            has_idle_cores = true;
+            break;
+        }
+    }
+
+    return has_idle_cores ? 1 : 2;
+//    auto vm_cs = this->cloud_service->getVMComputeService(vm_name);
+//    auto hosts = this->cloud_service->getPerHostNumIdleCores();
+//    for (const auto &host : this->cloud_service->getExecutionHosts()) {
+//        wrench::S4U_Simulation::getMinPowerConsumption(host);
+//        std::cerr << "======== VM: " << vm_name << " - HOST: " << host << " - RUNNING: "
+//                  << worker_vms.at(host) << std::endl;
+//    }
+//    return 0;
 }

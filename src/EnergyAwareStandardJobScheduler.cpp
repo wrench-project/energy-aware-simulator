@@ -105,7 +105,9 @@ void EnergyAwareStandardJobScheduler::notifyTaskCompletion(
         auto cloud_service = std::dynamic_pointer_cast<wrench::CloudComputeService>(*compute_services.begin());
         auto vm_cs = cloud_service->getVMComputeService(it->second);
         if (vm_cs->getTotalNumCores() == vm_cs->getTotalNumIdleCores()) {
+            auto vm_pm = cloud_service->getVMPhysicalHostname(it->second);
             cloud_service->shutdownVM(it->second);
+            this->scheduling_algorithm->notifyVMShutdown(it->second, vm_pm);
         }
     }
 }

@@ -27,6 +27,8 @@ public:
 
     virtual std::string scheduleTask(const wrench::WorkflowTask *task) = 0;
 
+    virtual void notifyVMShutdown(const std::string &vm_name, const std::string &vm_pm) = 0;
+
 protected:
     std::shared_ptr<wrench::CloudComputeService> &cloud_service;
     std::unique_ptr<CostModel> cost_model;

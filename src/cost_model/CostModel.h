@@ -21,7 +21,9 @@ public:
 
     virtual ~CostModel() = default;
 
-    virtual double estimateCost(const wrench::WorkflowTask *task, std::string vm_name) = 0;
+    virtual double estimateCost(const wrench::WorkflowTask *task,
+                                std::string vm_name,
+                                std::map<std::string, int> worker_vms) = 0;
 
 protected:
     std::shared_ptr<wrench::CloudComputeService> cloud_service;

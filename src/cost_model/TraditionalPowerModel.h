@@ -16,7 +16,9 @@ class TraditionalPowerModel : public CostModel {
 public:
     explicit TraditionalPowerModel(std::shared_ptr<wrench::CloudComputeService> &cloud_service);
 
-    double estimateCost(const wrench::WorkflowTask *task, std::string vm_name) override;
+    double estimateCost(const wrench::WorkflowTask *task,
+                        std::string vm_name,
+                        std::map<std::string, int> worker_vms) override;
 };
 
 #endif //ENERGY_AWARE_TRADITIONALPOWERMODEL_H
