@@ -46,15 +46,7 @@ void EnergyAwareStandardJobScheduler::scheduleTasks(
     this->unscheduled_tasks = tasks.size();
 
     // Sort tasks by flops
-    auto sorted_tasks = tasks;
-    std::sort(sorted_tasks.begin(), sorted_tasks.end(),
-              [](const wrench::WorkflowTask *t1, const wrench::WorkflowTask *t2) -> bool {
-                  if (t1->getFlops() == t2->getFlops()) {
-                      return ((uintptr_t) t1 < (uintptr_t) t2);
-                  } else {
-                      return (t1->getFlops() > t2->getFlops());
-                  }
-              });
+    auto sorted_tasks = this->scheduling_algorithm->sortTasks(tasks);
 
     // obtaining cloud service
     auto cloud_service = std::dynamic_pointer_cast<wrench::CloudComputeService>(*compute_services.begin());

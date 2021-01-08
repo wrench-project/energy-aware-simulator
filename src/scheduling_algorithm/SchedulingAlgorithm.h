@@ -25,6 +25,8 @@ public:
 
     virtual ~SchedulingAlgorithm() = default;
 
+    virtual std::vector<wrench::WorkflowTask *> sortTasks(const std::vector<wrench::WorkflowTask *> &tasks) = 0;
+
     virtual std::string scheduleTask(const wrench::WorkflowTask *task) = 0;
 
     virtual void notifyVMShutdown(const std::string &vm_name, const std::string &vm_pm) = 0;

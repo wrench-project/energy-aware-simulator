@@ -23,6 +23,26 @@ SPSSEBAlgorithm::SPSSEBAlgorithm(std::shared_ptr<wrench::CloudComputeService> &c
 
 /**
  *
+ * @param tasks
+ * @return
+ */
+std::vector<wrench::WorkflowTask *> SPSSEBAlgorithm::sortTasks(const std::vector<wrench::WorkflowTask *> &tasks) {
+    auto sorted_tasks = tasks;
+
+    std::sort(sorted_tasks.begin(), sorted_tasks.end(),
+              [](const wrench::WorkflowTask *t1, const wrench::WorkflowTask *t2) -> bool {
+                  if (t1->getFlops() == t2->getFlops()) {
+                      return ((uintptr_t) t1 < (uintptr_t) t2);
+                  } else {
+                      return (t1->getFlops() > t2->getFlops());
+                  }
+              });
+
+    return sorted_tasks;
+}
+
+/**
+ *
  * @param task
  * @return
  */

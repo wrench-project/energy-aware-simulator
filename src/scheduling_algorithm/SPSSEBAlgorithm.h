@@ -18,6 +18,8 @@ public:
     SPSSEBAlgorithm(std::shared_ptr<wrench::CloudComputeService> &cloud_service,
                     std::unique_ptr<CostModel> cost_model);
 
+    std::vector<wrench::WorkflowTask *> sortTasks(const std::vector<wrench::WorkflowTask *> &tasks) override;
+
     std::string scheduleTask(const wrench::WorkflowTask *task) override;
 
     void notifyVMShutdown(const std::string &vm_name, const std::string &vm_pm) override;

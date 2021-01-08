@@ -38,12 +38,4 @@ double TraditionalPowerModel::estimateCost(const wrench::WorkflowTask *task, std
     }
 
     return has_idle_cores ? 1 : 2;
-//    auto vm_cs = this->cloud_service->getVMComputeService(vm_name);
-//    auto hosts = this->cloud_service->getPerHostNumIdleCores();
-//    for (const auto &host : this->cloud_service->getExecutionHosts()) {
-//        wrench::S4U_Simulation::getMinPowerConsumption(host);
-//        std::cerr << "======== VM: " << vm_name << " - HOST: " << host << " - RUNNING: "
-//                  << worker_vms.at(host) << std::endl;
-//    }
-//    return 0;
 }
