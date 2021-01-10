@@ -12,6 +12,8 @@
 
 #include <wrench-dev.h>
 
+#include "PowerMeter.h"
+
 /**
  *  @brief A Workflow Management System (WMS) implementation that greedily
  *         assigns tasks to compute services.
@@ -24,7 +26,6 @@ public:
               const std::set<std::shared_ptr<wrench::StorageService>> &storage_services,
               const std::string &hostname);
 
-protected:
     // Overridden method
     void processEventStandardJobCompletion(std::shared_ptr<wrench::StandardJobCompletedEvent>) override;
 

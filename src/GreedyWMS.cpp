@@ -54,11 +54,20 @@ int GreedyWMS::main() {
 
     auto compute_services = this->getAvailableComputeServices<wrench::ComputeService>();
 
-//    WRENCH_INFO("Initializing scheduler");
-//    ((EnergyAwareStandardJobScheduler *) (this->getStandardJobScheduler()))->init(compute_services);
-
     // Create a job manager so that we can create/submit jobs
     auto job_manager = this->createJobManager();
+
+    // start the power meter
+    // power meter
+    auto cloud_service = std::dynamic_pointer_cast<wrench::CloudComputeService>(*compute_services.begin());
+    auto power_meter = std::make_shared<PowerMeter>(this, cloud_service->getExecutionHosts(), 1.0, false);
+    power_meter->simulation = this->simulation;
+    power_meter->start(power_meter, true, true); // Always daemonize
+
+    // turn off workers
+    for (auto &host : cloud_service->getExecutionHosts()) {
+        wrench::Simulation::turnOffHost(host);
+    }
 
     // While the workflow is not done, repeat the main loop
     while (not this->getWorkflow()->isDone()) {
@@ -92,7 +101,6 @@ void GreedyWMS::processEventStandardJobCompletion(std::shared_ptr<wrench::Standa
         // notify task completion
         WRENCH_INFO("Notified that a standard job has completed task %s", task->getID().c_str());
         auto scheduler = (EnergyAwareStandardJobScheduler *) (this->getStandardJobScheduler());
-//         scheduler->updateCoreIdleness(cs, task->getExecutionHistory().top().num_cores_allocated);
         scheduler->notifyTaskCompletion(this->getAvailableComputeServices<wrench::ComputeService>(), task);
     }
 }
@@ -114,5 +122,5 @@ void GreedyWMS::processEventStandardJobFailure(std::shared_ptr<wrench::StandardJ
         // Retrieve the job's tasks
         WRENCH_INFO(" - %s", task->getID().c_str());
     }
-    throw std::runtime_error("This should not happen in this example");
+    throw std::runtime_error("This should not happen in this simulator");
 }

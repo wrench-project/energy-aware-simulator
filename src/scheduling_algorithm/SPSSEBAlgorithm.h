@@ -26,7 +26,7 @@ public:
 
 private:
     std::set<std::string> vms_pool;
-    std::map<std::string, int> worker_vms;
+    std::map<std::string, int> worker_running_vms;
 };
 
 #endif //ENERGY_AWARE_SPSSEBALGORITHM_H

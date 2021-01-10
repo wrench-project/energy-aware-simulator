@@ -32,6 +32,8 @@ set(SOURCE_FILES
         src/EnergyAwareStandardJobScheduler.cpp
         src/GreedyWMS.h
         src/GreedyWMS.cpp
+        src/PowerMeter.h
+        src/PowerMeter.cpp
         src/cost_model/CostModel.h
         src/cost_model/TraditionalPowerModel.h
         src/cost_model/TraditionalPowerModel.cpp

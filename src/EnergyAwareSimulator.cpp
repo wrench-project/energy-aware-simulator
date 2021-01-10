@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
     simulation.init(&argc, argv);
 
     // check to make sure there are the right number of arguments
-    if (argc != 3) {
+    if (argc < 3) {
         std::cerr << "WRENCH Pegasus WMS Simulator" << std::endl;
         std::cerr << "Usage: " << argv[0]
                   << " <xml platform file> <JSON workflow file>"
@@ -95,8 +95,29 @@ int main(int argc, char **argv) {
 
     WRENCH_INFO("Simulation done!");
 
-    // statistics
+    // json output file
     simulation.getOutput().dumpUnifiedJSON(workflow, "tmp.json");
+
+    // statistics
+    auto power_trace = simulation.getOutput().getTrace<wrench::SimulationTimestampEnergyConsumption>();
+    double previous_date = 0;
+    std::map<std::string, double> workers_power;
+    for (auto &host : hosts) {
+        workers_power.insert(std::pair<std::string, double>(host, 0));
+    }
+    for (auto measurement : power_trace) {
+        auto diff = (measurement->getContent()->getDate() - previous_date);
+        workers_power.at(measurement->getContent()->getHostname()) +=
+                measurement->getContent()->getConsumption() *
+                ((diff > 0 ? diff : 1) / 3600.0);
+        previous_date = measurement->getContent()->getDate();
+    }
+    for (auto &host : hosts) {
+        std::cerr << "[" << host << ", "
+                  << workers_power.at(host) << ", "
+                  << simulation.getEnergyConsumed(host) / 3600 << "]"
+                  << std::endl;
+    }
 
     return 0;
 }

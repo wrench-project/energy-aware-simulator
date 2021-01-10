@@ -30,6 +30,9 @@ double TraditionalPowerModel::estimateCost(const wrench::WorkflowTask *task, std
 
     bool has_idle_cores = false;
     for (const auto &host : this->cloud_service->getExecutionHosts()) {
+        if (worker_vms.find(host) == worker_vms.end()) {
+            continue;
+        }
         int running_vms = worker_vms.at(host);
         if (running_vms > 0 && running_vms < wrench::Simulation::getHostNumCores(host)) {
             has_idle_cores = true;
