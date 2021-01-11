@@ -45,6 +45,7 @@ int main(int argc, char **argv) {
     workflow = wrench::PegasusWorkflowParser::createWorkflowFromJSON(workflow_file, "1f");
 
     WRENCH_INFO("The workflow has %ld tasks", workflow->getNumberOfTasks());
+    std::cerr << "Total Number of Workflow Tasks: " << workflow->getNumberOfTasks() << std::endl;
 
     std::string wms_host = "master";
 
@@ -55,7 +56,7 @@ int main(int argc, char **argv) {
 
     // compute services
     std::set<std::shared_ptr<wrench::ComputeService>> compute_services;
-    std::vector<std::string> hosts{"worker1", "worker2"};
+    std::vector<std::string> hosts{"worker1", "worker2",  "worker3", "worker4"};
     auto cloud_service = simulation.add(new wrench::CloudComputeService(wms_host, hosts, {"/"}, {}, {
             {wrench::CloudComputeServiceMessagePayload::START_VM_REQUEST_MESSAGE_PAYLOAD,    1024},
             {wrench::CloudComputeServiceMessagePayload::SHUTDOWN_VM_REQUEST_MESSAGE_PAYLOAD, 1024},
@@ -112,12 +113,11 @@ int main(int argc, char **argv) {
                 ((diff > 0 ? diff : 1) / 3600.0);
         previous_date = measurement->getContent()->getDate();
     }
+    double total_energy = 0;
     for (auto &host : hosts) {
-        std::cerr << "[" << host << ", "
-                  << workers_power.at(host) << ", "
-                  << simulation.getEnergyConsumed(host) / 3600 << "]"
-                  << std::endl;
+        total_energy += workers_power.at(host);
     }
-
+    std::cerr << "Workflow Makespan (s): " << wrench::Simulation::getCurrentSimulatedDate() << std::endl;
+    std::cerr << "Total Energy (Wh): " << total_energy << std::endl;
     return 0;
 }

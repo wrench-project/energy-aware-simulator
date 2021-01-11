@@ -14,7 +14,11 @@
 
 class PowerMeter : public wrench::Service {
 public:
-    PowerMeter(wrench::WMS *wms, const std::vector<std::string> &hostnames, double period, bool pairwise = false);
+    PowerMeter(wrench::WMS *wms,
+               const std::vector<std::string> &hostnames,
+               double period,
+               bool traditional = true,
+               bool pairwise = false);
 
     void stop() override;
 
@@ -30,6 +34,7 @@ private:
     bool processNextMessage(double timeout);
 
     wrench::WMS *wms;
+    bool traditional;
     bool pairwise;
     double measurement_period;
     double time_to_next_measurement;

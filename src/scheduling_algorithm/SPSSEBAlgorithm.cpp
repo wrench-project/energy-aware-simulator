@@ -81,7 +81,6 @@ std::string SPSSEBAlgorithm::scheduleTask(const wrench::WorkflowTask *task) {
     if (!has_idle_host) {
         for (auto &host : this->cloud_service->getExecutionHosts()) {
             if (!wrench::Simulation::isHostOn(host)) {
-                std::cerr << "======= TURNING ON: " << host << std::endl;
                 wrench::Simulation::turnOnHost(host);
                 break;
             }
@@ -105,16 +104,6 @@ std::string SPSSEBAlgorithm::scheduleTask(const wrench::WorkflowTask *task) {
             this->worker_running_vms.at(vm_pm)++;
         };
 
-//        if (!wrench::Simulation::isHostOn(vm_pm)) {
-//            std::cerr << "======= TURNING ON: " << vm_pm << std::endl;
-//            wrench::Simulation::turnOnHost(vm_pm);
-//        }
-//        if (this->worker_running_vms.at(vm_pm) == 4) {
-//            std::cerr << "======== 1 WORKER is 4: " << vm_pm << std::endl;
-//            for (auto &it : this->worker_running_vms) {
-//                std::cerr << "========== 1 [" << it.first << ", " << it.second << "]" << std::endl;
-//            }
-//        }
         return vm_name;
     }
 
@@ -130,18 +119,7 @@ std::string SPSSEBAlgorithm::scheduleTask(const wrench::WorkflowTask *task) {
             this->worker_running_vms.insert(std::pair<std::string, int>(vm_pm, 0));
         }
 
-//        std::cerr << "======== CREATED AND STARTED: " << vm_name << " - " << vm_pm << std::endl;
-//
-//        if (this->worker_running_vms.at(vm_pm) == 4) {
-//            std::cerr << "======== 2 WORKER is 4: " << vm_pm << " - " << vm_name << std::endl;
-//            for (auto &it : this->worker_running_vms) {
-//                std::cerr << "========== 2 [" << it.first << ", " << it.second << "]" << std::endl;
-//            }
-//        }
         this->worker_running_vms.at(vm_pm)++;
-//        for (auto &it : this->worker_running_vms) {
-//            std::cerr << "========== 2 [" << it.first << ", " << it.second << "]" << std::endl;
-//        }
         this->vm_worker_map.insert(std::pair<std::string, std::string>(vm_name, vm_pm));
     }
 
@@ -150,11 +128,7 @@ std::string SPSSEBAlgorithm::scheduleTask(const wrench::WorkflowTask *task) {
 
 void SPSSEBAlgorithm::notifyVMShutdown(const std::string &vm_name, const std::string &vm_pm) {
     this->worker_running_vms.at(vm_pm)--;
-//    for (auto &it : this->worker_running_vms) {
-//        std::cerr << "========== [" << it.first << ", " << it.second << "]" << std::endl;
-//    }
     if (this->worker_running_vms.at(vm_pm) == 0) {
-        std::cerr << "======= TURNING OFF: " << vm_pm << std::endl;
         wrench::Simulation::turnOffHost(vm_pm);
     }
 }

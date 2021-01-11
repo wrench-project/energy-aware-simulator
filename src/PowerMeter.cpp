@@ -17,14 +17,19 @@ XBT_LOG_NEW_DEFAULT_CATEGORY(power_meter, "Log category for PowerMeter");
  * @param wms: the WMS that uses this power meter
  * @param hostnames: the list of metered hosts, as hostnames
  * @param measurement_period: the measurement period
+ * @param traditional: whether the traditional power model should be used
  * @param pairwise: whether cores in socket are enabled in pairwise manner
  */
 PowerMeter::PowerMeter(wrench::WMS *wms,
                        const std::vector<std::string> &hostnames,
                        double measurement_period,
+                       bool traditional,
                        bool pairwise) :
         Service(wms->hostname, "power_meter", "power_meter"),
-        wms(wms), pairwise(pairwise), measurement_period(measurement_period) {
+        wms(wms),
+        traditional(traditional),
+        pairwise(pairwise),
+        measurement_period(measurement_period) {
     // sanity checks
     if (hostnames.empty()) {
         throw std::invalid_argument("PowerMeter::PowerMeter(): no host to meter!");
@@ -124,37 +129,44 @@ void PowerMeter::computePowerMeasurements(const std::string &hostname,
     for (auto task : tasks) {
         double task_consumption;
 
-        // power related to cpu usage
-        // dynamic power per socket
-        double dynamic_power =
-                (wrench::S4U_Simulation::getMaxPowerConsumption(hostname) -
-                 wrench::S4U_Simulation::getMinPowerConsumption(hostname)) *
-                (task->getAverageCPU() / 100) / 2;
-
-        if (this->pairwise && task_index < 2) {
-            task_consumption = dynamic_power / 6;
-
-        } else if (this->pairwise && task_index >= 2) {
-            task_consumption = task_factor * dynamic_power / 6;
-            task_factor *= 0.88;
-
-        } else if (not this->pairwise && std::fmod(task_index, 6) == 0) {
-            task_consumption = dynamic_power / 6;
-            task_factor = 1;
+        if (this->traditional) {
+            task_consumption = (wrench::Simulation::getMaxPowerConsumption(hostname) -
+                                wrench::Simulation::getMinPowerConsumption(hostname)) /
+                               double(wrench::Simulation::getHostNumCores(hostname));
 
         } else {
-            task_consumption = task_factor * dynamic_power / 6;
-            task_factor *= 0.9;
+            // power related to cpu usage
+            // dynamic power per socket
+            double dynamic_power =
+                    (wrench::Simulation::getMaxPowerConsumption(hostname) -
+                     wrench::Simulation::getMinPowerConsumption(hostname)) *
+                    (task->getAverageCPU() / 100) / 2;
+
+            if (this->pairwise && task_index < 2) {
+                task_consumption = dynamic_power / 6;
+
+            } else if (this->pairwise && task_index >= 2) {
+                task_consumption = task_factor * (dynamic_power / 6);
+                task_factor *= 0.88;
+
+            } else if (not this->pairwise && std::fmod(task_index, 6) == 0) {
+                task_consumption = dynamic_power / 6;
+                task_factor = 1;
+
+            } else {
+                task_consumption = task_factor * (dynamic_power / 6);
+                task_factor *= 0.9;
+            }
+
+            // power related to IO usage
+            task_consumption += task_consumption * (this->pairwise ? 0.486 : 0.213);
+
+            // IOWait factor
+            task_consumption *= 1.31;
+            task_index++;
         }
 
-        // power related to IO usage
-        task_consumption += task_consumption * (this->pairwise ? 0.486 : 0.213);
-
-        // IOWait factor
-//            task_consumption *= 1.31;
-
         consumption += task_consumption;
-        task_index++;
     }
 
     this->simulation->getOutput().addTimestampEnergyConsumption(hostname, consumption);
