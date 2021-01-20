@@ -48,8 +48,10 @@ std::vector<wrench::WorkflowTask *> IOAwareAlgorithm::sortTasks(const vector<wre
     std::vector<std::string> scheduled_vms;
     bool begin = true;
 
-    while (task_end_shift < (sorted_tasks.size() + 1)/ 2) {
+//    while (task_end_shift < (sorted_tasks.size() + 1)/ 2) {
+    for (auto task : sorted_tasks) {
         std::string candidate_host;
+        unsigned long candidate_host_used_cores = LONG_MAX;
 
         // look for existing VMs
         for (auto &it : this->vm_worker_map) {
@@ -59,6 +61,7 @@ std::vector<wrench::WorkflowTask *> IOAwareAlgorithm::sortTasks(const vector<wre
                 if (!std::count(scheduled_vms.begin(), scheduled_vms.end(), it.first)) {
                     scheduled_vms.push_back(it.first);
                     candidate_host = it.second;
+                    candidate_host_used_cores = this->cloud_service->getPerHostNumIdleCores().at(it.second);
                     break;
                 }
             }
@@ -79,9 +82,9 @@ std::vector<wrench::WorkflowTask *> IOAwareAlgorithm::sortTasks(const vector<wre
         }
         idle_cores_host[candidate_host]--;
 
-        auto task = begin ? *(sorted_tasks.begin() + task_begin_shift) : *(sorted_tasks.end() - task_end_shift - 1);
-        begin ? task_begin_shift++ : task_end_shift++;
-        begin = !begin;
+//        auto task = begin ? *(sorted_tasks.begin() + task_begin_shift) : *(sorted_tasks.end() - task_end_shift - 1);
+//        begin ? task_begin_shift++ : task_end_shift++;
+//        begin = !begin;
 //        std::cerr << "CANDIDATE HOST: " << candidate_host << " - " << task->getID() << std::endl;
 
         this->task_to_host_schedule.insert(std::pair<wrench::WorkflowTask *, std::string>(task, candidate_host));

@@ -70,8 +70,8 @@ int main(int argc, char **argv) {
             new wrench::SimpleStorageService(storage_host, {"/"}));
 
     // scheduling algorithm
-//    auto scheduling_algorithm = std::make_unique<SPSSEBAlgorithm>(
-    auto scheduling_algorithm = std::make_unique<IOAwareAlgorithm>(
+    auto scheduling_algorithm = std::make_unique<SPSSEBAlgorithm>(
+//    auto scheduling_algorithm = std::make_unique<IOAwareAlgorithm>(
             cloud_service,
             std::make_unique<TraditionalPowerModel>(cloud_service));
 
