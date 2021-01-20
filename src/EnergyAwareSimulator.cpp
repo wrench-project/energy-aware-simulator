@@ -13,6 +13,7 @@
 #include "EnergyAwareStandardJobScheduler.h"
 #include "GreedyWMS.h"
 #include "cost_model/TraditionalPowerModel.h"
+#include "scheduling_algorithm/IOAwareAlgorithm.h"
 #include "scheduling_algorithm/SPSSEBAlgorithm.h"
 
 XBT_LOG_NEW_DEFAULT_CATEGORY(EnergyAwareSimulator, "Log category for EnergyAwareSimulator");
@@ -56,7 +57,7 @@ int main(int argc, char **argv) {
 
     // compute services
     std::set<std::shared_ptr<wrench::ComputeService>> compute_services;
-    std::vector<std::string> hosts{"worker1", "worker2",  "worker3", "worker4"};
+    std::vector<std::string> hosts{"worker1", "worker2", "worker3", "worker4"};
     auto cloud_service = simulation.add(new wrench::CloudComputeService(wms_host, hosts, {"/"}, {}, {
             {wrench::CloudComputeServiceMessagePayload::START_VM_REQUEST_MESSAGE_PAYLOAD,    1024},
             {wrench::CloudComputeServiceMessagePayload::SHUTDOWN_VM_REQUEST_MESSAGE_PAYLOAD, 1024},
@@ -68,13 +69,16 @@ int main(int argc, char **argv) {
     std::shared_ptr<wrench::StorageService> storage_service = simulation.add(
             new wrench::SimpleStorageService(storage_host, {"/"}));
 
+    // scheduling algorithm
+//    auto scheduling_algorithm = std::make_unique<SPSSEBAlgorithm>(
+    auto scheduling_algorithm = std::make_unique<IOAwareAlgorithm>(
+            cloud_service,
+            std::make_unique<TraditionalPowerModel>(cloud_service));
+
     // instantiate the wms
     auto wms = simulation.add(
             new GreedyWMS(std::make_unique<EnergyAwareStandardJobScheduler>(
-                    storage_service,
-                    std::make_unique<SPSSEBAlgorithm>(
-                            cloud_service,
-                            std::make_unique<TraditionalPowerModel>(cloud_service))),
+                    storage_service, std::move(scheduling_algorithm)),
                           compute_services, {storage_service}, wms_host));
 
     wms->addWorkflow(workflow);

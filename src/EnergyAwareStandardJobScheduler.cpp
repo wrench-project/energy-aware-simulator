@@ -45,7 +45,7 @@ void EnergyAwareStandardJobScheduler::scheduleTasks(
     WRENCH_INFO("There are %ld ready tasks to schedule", tasks.size());
     this->unscheduled_tasks = tasks.size();
 
-    // Sort tasks by flops
+    // Sort tasks
     auto sorted_tasks = this->scheduling_algorithm->sortTasks(tasks);
 
     // obtaining cloud service

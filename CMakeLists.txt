@@ -37,6 +37,8 @@ set(SOURCE_FILES
         src/cost_model/CostModel.h
         src/cost_model/TraditionalPowerModel.h
         src/cost_model/TraditionalPowerModel.cpp
+        src/scheduling_algorithm/IOAwareAlgorithm.h
+        src/scheduling_algorithm/IOAwareAlgorithm.cpp
         src/scheduling_algorithm/SchedulingAlgorithm.h
         src/scheduling_algorithm/SPSSEBAlgorithm.h
         src/scheduling_algorithm/SPSSEBAlgorithm.cpp
