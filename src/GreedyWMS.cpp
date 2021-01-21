@@ -57,12 +57,22 @@ int GreedyWMS::main() {
     // Create a job manager so that we can create/submit jobs
     auto job_manager = this->createJobManager();
 
-    // start the power meter
-    // power meter
+    // start the power meters
     auto cloud_service = std::dynamic_pointer_cast<wrench::CloudComputeService>(*compute_services.begin());
-    auto power_meter = std::make_shared<PowerMeter>(this, cloud_service->getExecutionHosts(), 1.0, true, false);
-    power_meter->simulation = this->simulation;
-    power_meter->start(power_meter, true, true); // Always daemonize
+    // traditional power meter
+    auto traditional_power_meter = std::make_shared<PowerMeter>(this, cloud_service->getExecutionHosts(), 1.0, true,false);
+    traditional_power_meter->simulation = this->simulation;
+    traditional_power_meter->start(traditional_power_meter, true, true); // Always daemonize
+    // pairwise power meter
+    auto pairwise_power_meter = std::make_shared<PowerMeter>(this, cloud_service->getExecutionHosts(), 1.0, false,
+                                                             true);
+    pairwise_power_meter->simulation = this->simulation;
+    pairwise_power_meter->start(pairwise_power_meter, true, true); // Always daemonize
+    // unpaired power meter
+    auto unpaired_power_meter = std::make_shared<PowerMeter>(this, cloud_service->getExecutionHosts(), 1.0, false,
+                                                             false);
+    unpaired_power_meter->simulation = this->simulation;
+    unpaired_power_meter->start(unpaired_power_meter, true, true); // Always daemonize
 
     // turn off workers
     for (auto &host : cloud_service->getExecutionHosts()) {

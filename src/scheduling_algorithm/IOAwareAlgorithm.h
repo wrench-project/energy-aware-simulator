@@ -23,7 +23,7 @@ public:
 
     void notifyVMShutdown(const std::string &vm_name, const std::string &vm_pm) override;
 
-private:
+protected:
     std::map<const wrench::WorkflowTask *, std::string> task_to_host_schedule;
     std::map<std::string, int> worker_running_vms;
 };

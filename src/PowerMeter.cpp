@@ -169,7 +169,9 @@ void PowerMeter::computePowerMeasurements(const std::string &hostname,
         consumption += task_consumption;
     }
 
-    this->simulation->getOutput().addTimestampEnergyConsumption(hostname, consumption);
+    std::string appended_hostname = (this->traditional ? "traditional" : this->pairwise ? "pairwise" : "unpaired");
+
+    this->simulation->getOutput().addTimestampEnergyConsumption(appended_hostname + "__" + hostname, consumption);
 }
 
 /**

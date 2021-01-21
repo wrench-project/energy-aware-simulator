@@ -14,6 +14,7 @@
 #include "GreedyWMS.h"
 #include "cost_model/TraditionalPowerModel.h"
 #include "scheduling_algorithm/IOAwareAlgorithm.h"
+#include "scheduling_algorithm/IOAwareBalanceAlgorithm.h"
 #include "scheduling_algorithm/SPSSEBAlgorithm.h"
 
 XBT_LOG_NEW_DEFAULT_CATEGORY(EnergyAwareSimulator, "Log category for EnergyAwareSimulator");
@@ -70,8 +71,9 @@ int main(int argc, char **argv) {
             new wrench::SimpleStorageService(storage_host, {"/"}));
 
     // scheduling algorithm
-    auto scheduling_algorithm = std::make_unique<SPSSEBAlgorithm>(
+//    auto scheduling_algorithm = std::make_unique<SPSSEBAlgorithm>(
 //    auto scheduling_algorithm = std::make_unique<IOAwareAlgorithm>(
+    auto scheduling_algorithm = std::make_unique<IOAwareBalanceAlgorithm>(
             cloud_service,
             std::make_unique<TraditionalPowerModel>(cloud_service));
 
@@ -105,23 +107,62 @@ int main(int argc, char **argv) {
 
     // statistics
     auto power_trace = simulation.getOutput().getTrace<wrench::SimulationTimestampEnergyConsumption>();
-    double previous_date = 0;
-    std::map<std::string, double> workers_power;
+    double previous_traditional_date = 0;
+    double previous_pairwise_date = 0;
+    double previous_unpaired_date = 0;
+    std::map<std::string, double> workers_traditional_power;
+    std::map<std::string, double> workers_pairwise_power;
+    std::map<std::string, double> workers_unpaired_power;
+
     for (auto &host : hosts) {
-        workers_power.insert(std::pair<std::string, double>(host, 0));
+        workers_traditional_power.insert(std::pair<std::string, double>(host, 0));
+        workers_pairwise_power.insert(std::pair<std::string, double>(host, 0));
+        workers_unpaired_power.insert(std::pair<std::string, double>(host, 0));
     }
     for (auto measurement : power_trace) {
-        auto diff = (measurement->getContent()->getDate() - previous_date);
-        workers_power.at(measurement->getContent()->getHostname()) +=
-                measurement->getContent()->getConsumption() *
-                ((diff > 0 ? diff : 1) / 3600.0);
-        previous_date = measurement->getContent()->getDate();
+        auto key = measurement->getContent()->getHostname();
+        auto model = key.substr(0, key.find("__"));
+        auto hostname = key.substr(key.find("__") + 2, key.size());
+
+        if (model == "traditional") {
+            auto diff = (measurement->getContent()->getDate() - previous_traditional_date);
+            workers_traditional_power.at(hostname) += measurement->getContent()->getConsumption() *
+                                                      ((diff > 0 ? diff : 1) / 3600.0);
+            previous_traditional_date = measurement->getContent()->getDate();
+
+        } else if (model == "pairwise") {
+            auto diff = (measurement->getContent()->getDate() - previous_pairwise_date);
+            workers_pairwise_power.at(hostname) += measurement->getContent()->getConsumption() *
+                                                   ((diff > 0 ? diff : 1) / 3600.0);
+            previous_pairwise_date = measurement->getContent()->getDate();
+
+        } else if (model == "unpaired") {
+            auto diff = (measurement->getContent()->getDate() - previous_unpaired_date);
+            workers_unpaired_power.at(hostname) += measurement->getContent()->getConsumption() *
+                                                   ((diff > 0 ? diff : 1) / 3600.0);
+            previous_unpaired_date = measurement->getContent()->getDate();
+        }
     }
-    double total_energy = 0;
+
+    double total_traditional_energy = 0;
+    double total_pairwise_energy = 0;
+    double total_unpaired_energy = 0;
+
     for (auto &host : hosts) {
-        total_energy += workers_power.at(host);
+        total_traditional_energy += workers_traditional_power.at(host);
+        total_pairwise_energy += workers_pairwise_power.at(host);
+        total_unpaired_energy += workers_unpaired_power.at(host);
     }
     std::cerr << "Workflow Makespan (s): " << wrench::Simulation::getCurrentSimulatedDate() << std::endl;
-    std::cerr << "Total Energy (Wh): " << total_energy << std::endl;
+    std::cerr << "Total Traditional Energy (Wh): " << total_traditional_energy << std::endl;
+    std::cerr << "Total Pairwise Energy (Wh): " << total_pairwise_energy << std::endl;
+    std::cerr << "Total Unpaired Energy (Wh): " << total_unpaired_energy << std::endl;
+    std::cerr << std::endl;
+    std::cerr << argv[3] << "," << workflow->getNumberOfTasks() << ",IOAware-Balance,traditional,"
+              << total_traditional_energy << "," << wrench::Simulation::getCurrentSimulatedDate() << std::endl;
+    std::cerr << argv[3] << "," << workflow->getNumberOfTasks() << ",IOAware-Balance,pairwise,"
+              << total_pairwise_energy << "," << wrench::Simulation::getCurrentSimulatedDate() << std::endl;
+    std::cerr << argv[3] << "," << workflow->getNumberOfTasks() << ",IOAware-Balance,unpaired,"
+              << total_unpaired_energy << "," << wrench::Simulation::getCurrentSimulatedDate() << std::endl;
     return 0;
 }
