@@ -160,11 +160,11 @@ int main(int argc, char **argv) {
     std::cerr << "Total Pairwise Energy (Wh): " << total_pairwise_energy << std::endl;
     std::cerr << "Total Unpaired Energy (Wh): " << total_unpaired_energy << std::endl;
     std::cerr << std::endl;
-    std::cerr << argv[3] << "," << workflow->getNumberOfTasks() << ",IOAware-Balance,traditional,"
+    std::cerr << argv[3] << "," << workflow->getNumberOfTasks() << ",EnReal,traditional,"
               << total_traditional_energy << "," << wrench::Simulation::getCurrentSimulatedDate() << std::endl;
-    std::cerr << argv[3] << "," << workflow->getNumberOfTasks() << ",IOAware-Balance,pairwise,"
+    std::cerr << argv[3] << "," << workflow->getNumberOfTasks() << ",EnReal,pairwise,"
               << total_pairwise_energy << "," << wrench::Simulation::getCurrentSimulatedDate() << std::endl;
-    std::cerr << argv[3] << "," << workflow->getNumberOfTasks() << ",IOAware-Balance,unpaired,"
+    std::cerr << argv[3] << "," << workflow->getNumberOfTasks() << ",EnReal,unpaired,"
               << total_unpaired_energy << "," << wrench::Simulation::getCurrentSimulatedDate() << std::endl;
     return 0;
 }
