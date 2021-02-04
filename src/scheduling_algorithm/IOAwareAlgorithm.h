@@ -25,7 +25,6 @@ public:
 
 protected:
     std::map<const wrench::WorkflowTask *, std::string> task_to_host_schedule;
-    std::map<std::string, int> worker_running_vms;
 };
 
 

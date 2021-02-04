@@ -35,6 +35,7 @@ protected:
     std::shared_ptr<wrench::CloudComputeService> &cloud_service;
     std::unique_ptr<CostModel> cost_model;
     std::map<std::string, std::string> vm_worker_map;
+    std::map<std::string, int> worker_running_vms;
 };
 
 #endif //ENERGY_AWARE_SCHEDULINGALGORITHM_H

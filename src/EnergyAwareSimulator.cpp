@@ -13,6 +13,7 @@
 #include "EnergyAwareStandardJobScheduler.h"
 #include "GreedyWMS.h"
 #include "cost_model/TraditionalPowerModel.h"
+#include "scheduling_algorithm/EnRealAlgorithm.h"
 #include "scheduling_algorithm/IOAwareAlgorithm.h"
 #include "scheduling_algorithm/IOAwareBalanceAlgorithm.h"
 #include "scheduling_algorithm/SPSSEBAlgorithm.h"
@@ -73,7 +74,8 @@ int main(int argc, char **argv) {
     // scheduling algorithm
 //    auto scheduling_algorithm = std::make_unique<SPSSEBAlgorithm>(
 //    auto scheduling_algorithm = std::make_unique<IOAwareAlgorithm>(
-    auto scheduling_algorithm = std::make_unique<IOAwareBalanceAlgorithm>(
+//    auto scheduling_algorithm = std::make_unique<IOAwareBalanceAlgorithm>(
+    auto scheduling_algorithm = std::make_unique<EnRealAlgorithm>(
             cloud_service,
             std::make_unique<TraditionalPowerModel>(cloud_service));
 

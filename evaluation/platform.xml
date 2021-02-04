@@ -15,7 +15,7 @@
             </disk>
         </host>
         <host id="worker1" speed="1f" core="12">
-            <prop id="watt_per_state" value="98.08:120.0:200.0" />
+            <prop id="wattage_per_state" value="98.080000:112.727273:200.000000" />
             <prop id="watt_off" value="10" />
             <disk id="hard_drive" read_bw="100MBps" write_bw="100MBps">
                 <prop id="size" value="5000GiB"/>
@@ -23,7 +23,7 @@
             </disk>
         </host>
         <host id="worker2" speed="1f" core="12">
-            <prop id="watt_per_state" value="98.08:120.0:200.0" />
+            <prop id="wattage_per_state" value="98.080000:112.727273:200.000000" />
             <prop id="watt_off" value="10" />
             <disk id="hard_drive" read_bw="100MBps" write_bw="100MBps">
                 <prop id="size" value="5000GiB"/>
@@ -31,7 +31,7 @@
             </disk>
         </host>
         <host id="worker3" speed="1f" core="12">
-            <prop id="watt_per_state" value="98.08:120.0:200.0" />
+            <prop id="wattage_per_state" value="98.080000:112.727273:200.000000" />
             <prop id="watt_off" value="10" />
             <disk id="hard_drive" read_bw="100MBps" write_bw="100MBps">
                 <prop id="size" value="5000GiB"/>
@@ -39,7 +39,7 @@
             </disk>
         </host>
         <host id="worker4" speed="1f" core="12">
-            <prop id="watt_per_state" value="98.08:120.0:200.0" />
+            <prop id="wattage_per_state" value="98.080000:112.727273:200.000000" />
             <prop id="watt_off" value="10" />
             <disk id="hard_drive" read_bw="100MBps" write_bw="100MBps">
                 <prop id="size" value="5000GiB"/>
