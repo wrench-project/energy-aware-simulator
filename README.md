@@ -11,3 +11,11 @@ An energy-aware workflow scheduling simulator developed with the
 
 - [SimGrid](http://simgrid.org) 3.26
 - [WRENCH](https://wrench-project.org) 1.8-dev
+
+### The Simulator
+
+This simulator implements the following scheduling algorithms:
+
+- Static Provisioning-Static Scheduling under Energy and Budget
+  Constraints ([SPSS-EB](https://doi.org/10.1109/CGC.2013.14))
+- Energy-aware Resource Allocation ([EnReal](https://doi.org/10.1109/TCC.2015.2453966))
